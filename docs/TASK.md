@@ -112,10 +112,14 @@ JWT 기반 인증 시스템을 구현하여 사용자 인증 및 권한 관리�
 - API 문서화 도구 설정 (Swagger)
   - Swagger UI 정상 작동 확인: http://localhost:8080/swagger/index.html
   - API 문서 자동 생성 설정 완료
+  - 프로젝트 맞춤형 문서 업데이트 (한국어 설명, Vibe 코딩 개념 반영)
 - 프론트엔드 통합을 위한 TypeScript 타입 정의
 - 개발 환경 자동화
   - `/rebuild` 명령어로 전체 시스템 재빌드
   - `/quick-rebuild` 명령어로 백엔드만 재빌드
+- API 경로 표준화
+  - 모든 API 엔드포인트를 `/api/v1` 하위로 통일
+  - Health API: http://localhost:8080/api/v1/health
 
 ### 다음 마일스톤
 - JWT 인증 시스템 구현
