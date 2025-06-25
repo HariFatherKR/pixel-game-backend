@@ -3,11 +3,15 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/yourusername/pixel-game/internal/auth"
 	"github.com/yourusername/pixel-game/internal/config"
+	"github.com/yourusername/pixel-game/internal/handlers"
+	"github.com/yourusername/pixel-game/internal/middleware"
 	"github.com/yourusername/pixel-game/internal/swagger"
 	_ "github.com/yourusername/pixel-game/docs"
 )
@@ -38,6 +42,17 @@ func main() {
 		log.Printf("Failed to load configuration: %v", err)
 		// Continue with defaults
 	}
+
+	// Initialize JWT manager
+	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
+	if jwtSecretKey == "" {
+		jwtSecretKey = "your-secret-key-change-in-production"
+		log.Println("Warning: Using default JWT secret key. Set JWT_SECRET_KEY environment variable for production.")
+	}
+	jwtManager := auth.NewJWTManager(jwtSecretKey)
+
+	// Initialize handlers
+	authHandler := handlers.NewAuthHandler(jwtManager)
 
 	// Initialize router
 	r := gin.Default()
@@ -75,9 +90,26 @@ func main() {
 		// Health check endpoint
 		api.GET("/health", HealthCheck)
 		
-		// Card endpoints
-		api.GET("/cards", GetCards)
-		api.GET("/cards/:id", GetCard)
+		// Authentication endpoints
+		auth := api.Group("/auth")
+		{
+			auth.POST("/register", authHandler.Register)
+			auth.POST("/login", authHandler.Login)
+			auth.POST("/refresh", authHandler.RefreshToken)
+			
+			// Protected auth endpoints
+			auth.Use(middleware.AuthMiddleware(jwtManager))
+			auth.POST("/logout", authHandler.Logout)
+			auth.GET("/profile", authHandler.Profile)
+		}
+		
+		// Card endpoints (optional auth for future features)
+		cards := api.Group("/cards")
+		cards.Use(middleware.OptionalAuthMiddleware(jwtManager))
+		{
+			cards.GET("", GetCards)
+			cards.GET("/:id", GetCard)
+		}
 		
 		// Version endpoint
 		api.GET("/version", GetVersion)

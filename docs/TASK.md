@@ -20,21 +20,22 @@
 - [x] PostgreSQL 연결 및 데이터 검증
 - [x] Redis 연결 및 동작 확인
 
-### 🚧 Phase 3: 인증 시스템 구현 (진행 중)
-- [ ] JWT 토큰 기반 인증 구현
-- [ ] 회원가입 API (`POST /api/v1/auth/register`)
-- [ ] 로그인 API (`POST /api/v1/auth/login`)
-- [ ] 로그아웃 API (`POST /api/v1/auth/logout`)
-- [ ] 토큰 갱신 API (`POST /api/v1/auth/refresh`)
-- [ ] 인증 미들웨어 구현
-- [ ] 비밀번호 해싱 (bcrypt)
+### ✅ Phase 3: 인증 시스템 구현 (완료)
+- [x] JWT 토큰 기반 인증 구현
+- [x] 회원가입 API (`POST /api/v1/auth/register`)
+- [x] 로그인 API (`POST /api/v1/auth/login`)
+- [x] 로그아웃 API (`POST /api/v1/auth/logout`)
+- [x] 토큰 갱신 API (`POST /api/v1/auth/refresh`)
+- [x] 인증 미들웨어 구현
+- [x] 비밀번호 해싱 (bcrypt)
+- [x] 사용자 프로필 조회 API (`GET /api/v1/auth/profile`)
 
-### 📅 Phase 4: 사용자 관리 시스템
-- [ ] 사용자 프로필 조회 API (`GET /api/v1/users/profile`)
+### 🚧 Phase 4: 사용자 관리 시스템 (다음 목표)
 - [ ] 사용자 프로필 수정 API (`PUT /api/v1/users/profile`)
 - [ ] 사용자 통계 조회 API (`GET /api/v1/users/stats`)
 - [ ] 사용자 카드 컬렉션 조회 API (`GET /api/v1/users/collection`)
 - [ ] 플랫폼별 사용자 구분 (Android/iOS/Web)
+- [ ] 데이터베이스 연동 (PostgreSQL)
 
 ### 📅 Phase 5: 카드 시스템 구현
 - [ ] 카드 목록 조회 API (`GET /api/v1/cards`)
@@ -81,19 +82,19 @@
 
 ## 🎯 현재 작업 중인 태스크
 
-### Phase 3: 인증 시스템 구현
-JWT 기반 인증 시스템을 구현하여 사용자 인증 및 권한 관리를 처리합니다.
+### Phase 4: 사용자 관리 시스템
+PostgreSQL 데이터베이스와 연동하여 실제 사용자 데이터를 관리하는 시스템을 구현합니다.
 
 **다음 작업:**
-1. JWT 토큰 생성/검증 유틸리티 구현
-2. 회원가입 API 엔드포인트 구현
-3. 로그인 API 엔드포인트 구현
-4. 인증 미들웨어 구현
+1. User 도메인 모델과 데이터베이스 연동
+2. Repository 패턴을 활용한 데이터 액세스 레이어 구현
+3. 실제 사용자 데이터 기반 인증 시스템 업그레이드
+4. 사용자 프로필 관리 API 구현
 
 ## 📊 진행률
 
-- **전체 진행률**: 20% (2/10 Phase 완료)
-- **현재 Phase 진행률**: 0% (Phase 3 시작)
+- **전체 진행률**: 30% (3/10 Phase 완료)
+- **현재 Phase 진행률**: 0% (Phase 4 시작)
 
 ## 🔗 관련 문서
 
@@ -124,10 +125,21 @@ JWT 기반 인증 시스템을 구현하여 사용자 인증 및 권한 관리�
   - 프론트엔드 개발 서버 (localhost:3000, localhost:5173) 지원
   - OPTIONS preflight 요청 처리
   - 인증 헤더 및 쿠키 지원 설정
+- JWT 기반 인증 시스템 구현 완료
+  - JWT 토큰 생성/검증 유틸리티 (internal/auth/jwt.go)
+  - 비밀번호 해싱 (bcrypt) 유틸리티 (internal/auth/password.go)
+  - 인증 미들웨어 (internal/middleware/auth.go)
+  - 인증 API 엔드포인트 (internal/handlers/auth.go)
+    - POST /api/v1/auth/register (회원가입)
+    - POST /api/v1/auth/login (로그인)
+    - POST /api/v1/auth/logout (로그아웃)
+    - POST /api/v1/auth/refresh (토큰 갱신)
+    - GET /api/v1/auth/profile (프로필 조회)
+  - JWT 시크릿 키 환경변수 설정 (JWT_SECRET_KEY)
 
 ### 다음 마일스톤
-- JWT 인증 시스템 구현
-- 기본 사용자 관리 API 구현
+- PostgreSQL과 연동된 사용자 관리 시스템 구현
+- Repository 패턴을 활용한 데이터 액세스 레이어 구현
 - 실제 카드 데이터 기반 API 구현
 
 ---
