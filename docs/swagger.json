@@ -1,0 +1,198 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API server for Cyberpunk Deck Building Card Game",
+        "title": "Pixel Game API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.pixelgame.io/support",
+            "email": "support@pixelgame.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/cards": {
+            "get": {
+                "description": "Get a list of all available cards",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["cards"],
+                "summary": "List all cards",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.CardsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/cards/{id}": {
+            "get": {
+                "description": "Get details of a specific card",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["cards"],
+                "summary": "Get card by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.Card"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Check if the service is healthy",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["health"],
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.HealthResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/version": {
+            "get": {
+                "description": "Get the current version of the API",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["system"],
+                "summary": "Get API version",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.VersionResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "main.Card": {
+            "type": "object",
+            "properties": {
+                "cost": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Deal 8 damage and apply Vulnerable"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Code Slash"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": ["action", "event", "power"],
+                    "example": "action"
+                }
+            }
+        },
+        "main.CardsResponse": {
+            "type": "object",
+            "properties": {
+                "cards": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.Card"
+                    }
+                },
+                "total": {
+                    "type": "integer",
+                    "example": 3
+                }
+            }
+        },
+        "main.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Not found"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "The requested resource was not found"
+                }
+            }
+        },
+        "main.HealthResponse": {
+            "type": "object",
+            "properties": {
+                "service": {
+                    "type": "string",
+                    "example": "pixel-game-backend"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "healthy"
+                },
+                "timestamp": {
+                    "type": "integer",
+                    "example": 1234567890
+                }
+            }
+        },
+        "main.VersionResponse": {
+            "type": "object",
+            "properties": {
+                "build": {
+                    "type": "string",
+                    "example": "dev"
+                },
+                "version": {
+                    "type": "string",
+                    "example": "0.1.0"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

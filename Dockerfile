@@ -1,8 +1,8 @@
 # Build stage
 FROM golang:1.21-alpine AS builder
 
-# Install git and ca-certificates
-RUN apk add --no-cache git ca-certificates
+# Install build dependencies
+RUN apk add --no-cache git ca-certificates make
 
 # Set working directory
 WORKDIR /app
@@ -29,6 +29,9 @@ WORKDIR /root/
 
 # Copy the binary from builder
 COPY --from=builder /app/main .
+
+# Copy swagger docs
+COPY --from=builder /app/docs ./docs
 
 # Copy config file if needed
 COPY --from=builder /app/.env.example .env

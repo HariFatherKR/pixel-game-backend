@@ -1,0 +1,154 @@
+basePath: /api/v1
+definitions:
+  main.Card:
+    properties:
+      cost:
+        example: 2
+        type: integer
+      description:
+        example: Deal 8 damage and apply Vulnerable
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: Code Slash
+        type: string
+      type:
+        enum:
+        - action
+        - event
+        - power
+        example: action
+        type: string
+    type: object
+  main.CardsResponse:
+    properties:
+      cards:
+        items:
+          $ref: '#/definitions/main.Card'
+        type: array
+      total:
+        example: 3
+        type: integer
+    type: object
+  main.ErrorResponse:
+    properties:
+      error:
+        example: Not found
+        type: string
+      message:
+        example: The requested resource was not found
+        type: string
+    type: object
+  main.HealthResponse:
+    properties:
+      service:
+        example: pixel-game-backend
+        type: string
+      status:
+        example: healthy
+        type: string
+      timestamp:
+        example: 1234567890
+        type: integer
+    type: object
+  main.VersionResponse:
+    properties:
+      build:
+        example: dev
+        type: string
+      version:
+        example: 0.1.0
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@pixelgame.io
+    name: API Support
+    url: http://www.pixelgame.io/support
+  description: API server for Cyberpunk Deck Building Card Game
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Pixel Game API
+  version: "1.0"
+paths:
+  /cards:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all available cards
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.CardsResponse'
+      summary: List all cards
+      tags:
+      - cards
+  /cards/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get details of a specific card
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Card'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      summary: Get card by ID
+      tags:
+      - cards
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check if the service is healthy
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.HealthResponse'
+      summary: Health check
+      tags:
+      - health
+  /version:
+    get:
+      consumes:
+      - application/json
+      description: Get the current version of the API
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.VersionResponse'
+      summary: Get API version
+      tags:
+      - system
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -7,28 +7,28 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yourusername/pixel-game/internal/config"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/yourusername/pixel-game/internal/swagger"
+	_ "github.com/yourusername/pixel-game/docs"
 )
 
-// @title Pixel Game API
-// @version 1.0
-// @description API server for Cyberpunk Deck Building Card Game
-// @termsOfService http://swagger.io/terms/
+// @title           Pixel Game API
+// @version         1.0
+// @description     API server for Cyberpunk Deck Building Card Game
+// @termsOfService  http://swagger.io/terms/
 
-// @contact.name API Support
-// @contact.url http://www.pixelgame.io/support
-// @contact.email support@pixelgame.io
+// @contact.name   API Support
+// @contact.url    http://www.pixelgame.io/support
+// @contact.email  support@pixelgame.io
 
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8080
-// @BasePath /api/v1
+// @host      localhost:8080
+// @BasePath  /api/v1
 
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
+// @securityDefinitions.apikey  ApiKeyAuth
+// @in                          header
+// @name                        Authorization
 
 func main() {
 	// Load configuration
@@ -44,8 +44,8 @@ func main() {
 	// Health check endpoint
 	r.GET("/health", HealthCheck)
 
-	// Swagger documentation
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// Setup Swagger
+	swagger.SetupSwagger(r)
 
 	// API routes
 	api := r.Group("/api/v1")
@@ -72,13 +72,13 @@ func main() {
 }
 
 // HealthCheck godoc
-// @Summary Health check
-// @Description Check if the service is healthy
-// @Tags health
-// @Accept json
-// @Produce json
-// @Success 200 {object} HealthResponse
-// @Router /health [get]
+// @Summary      Health check
+// @Description  Check if the service is healthy
+// @Tags         health
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  HealthResponse
+// @Router       /health [get]
 func HealthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, HealthResponse{
 		Status:    "healthy",
@@ -88,13 +88,13 @@ func HealthCheck(c *gin.Context) {
 }
 
 // GetCards godoc
-// @Summary List all cards
-// @Description Get a list of all available cards
-// @Tags cards
-// @Accept json
-// @Produce json
-// @Success 200 {object} CardsResponse
-// @Router /cards [get]
+// @Summary      List all cards
+// @Description  Get a list of all available cards
+// @Tags         cards
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  CardsResponse
+// @Router       /cards [get]
 func GetCards(c *gin.Context) {
 	c.JSON(http.StatusOK, CardsResponse{
 		Cards: []Card{
@@ -107,15 +107,15 @@ func GetCards(c *gin.Context) {
 }
 
 // GetCard godoc
-// @Summary Get card by ID
-// @Description Get details of a specific card
-// @Tags cards
-// @Accept json
-// @Produce json
-// @Param id path int true "Card ID"
-// @Success 200 {object} Card
-// @Failure 404 {object} ErrorResponse
-// @Router /cards/{id} [get]
+// @Summary      Get card by ID
+// @Description  Get details of a specific card
+// @Tags         cards
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "Card ID"
+// @Success      200  {object}  Card
+// @Failure      404  {object}  ErrorResponse
+// @Router       /cards/{id} [get]
 func GetCard(c *gin.Context) {
 	// This is a placeholder implementation
 	c.JSON(http.StatusOK, Card{
@@ -128,13 +128,13 @@ func GetCard(c *gin.Context) {
 }
 
 // GetVersion godoc
-// @Summary Get API version
-// @Description Get the current version of the API
-// @Tags system
-// @Accept json
-// @Produce json
-// @Success 200 {object} VersionResponse
-// @Router /version [get]
+// @Summary      Get API version
+// @Description  Get the current version of the API
+// @Tags         system
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  VersionResponse
+// @Router       /version [get]
 func GetVersion(c *gin.Context) {
 	c.JSON(http.StatusOK, VersionResponse{
 		Version: "0.1.0",
@@ -144,12 +144,14 @@ func GetVersion(c *gin.Context) {
 
 // Response Models
 
+// HealthResponse represents the health check response
 type HealthResponse struct {
 	Status    string `json:"status" example:"healthy"`
 	Service   string `json:"service" example:"pixel-game-backend"`
 	Timestamp int64  `json:"timestamp" example:"1234567890"`
 }
 
+// Card represents a game card
 type Card struct {
 	ID          int    `json:"id" example:"1"`
 	Name        string `json:"name" example:"Code Slash"`
@@ -158,16 +160,19 @@ type Card struct {
 	Description string `json:"description" example:"Deal 8 damage and apply Vulnerable"`
 }
 
+// CardsResponse represents the cards list response
 type CardsResponse struct {
 	Cards []Card `json:"cards"`
 	Total int    `json:"total" example:"3"`
 }
 
+// VersionResponse represents the version info response
 type VersionResponse struct {
 	Version string `json:"version" example:"0.1.0"`
 	Build   string `json:"build" example:"dev"`
 }
 
+// ErrorResponse represents an error response
 type ErrorResponse struct {
 	Error   string `json:"error" example:"Not found"`
 	Message string `json:"message" example:"The requested resource was not found"`
