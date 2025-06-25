@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/yourusername/pixel-game/internal/config"
 	"github.com/yourusername/pixel-game/internal/swagger"
@@ -40,6 +41,30 @@ func main() {
 
 	// Initialize router
 	r := gin.Default()
+
+	// Setup CORS
+	r.Use(cors.New(cors.Config{
+		AllowOrigins: []string{
+			"http://localhost:3000",  // React default
+			"http://localhost:5173",  // Vite default
+			"http://localhost:8080",  // Same origin
+			"http://127.0.0.1:3000",
+			"http://127.0.0.1:5173",
+			"http://127.0.0.1:8080",
+		},
+		AllowMethods: []string{
+			"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS",
+		},
+		AllowHeaders: []string{
+			"Origin", "Content-Type", "Content-Length", "Accept-Encoding",
+			"X-CSRF-Token", "Authorization", "accept", "origin", "Cache-Control", "X-Requested-With",
+		},
+		ExposeHeaders: []string{
+			"Content-Length",
+		},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// Setup Swagger
 	swagger.SetupSwagger(r)

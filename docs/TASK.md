@@ -120,6 +120,10 @@ JWT 기반 인증 시스템을 구현하여 사용자 인증 및 권한 관리�
 - API 경로 표준화
   - 모든 API 엔드포인트를 `/api/v1` 하위로 통일
   - Health API: http://localhost:8080/api/v1/health
+- CORS 설정 완료
+  - 프론트엔드 개발 서버 (localhost:3000, localhost:5173) 지원
+  - OPTIONS preflight 요청 처리
+  - 인증 헤더 및 쿠키 지원 설정
 
 ### 다음 마일스톤
 - JWT 인증 시스템 구현
