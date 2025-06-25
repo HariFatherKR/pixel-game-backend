@@ -1,4 +1,4 @@
-.PHONY: help build run test clean docker-build docker-up docker-down docker-logs migrate-up migrate-down
+.PHONY: help build run test clean docker-build docker-up docker-down docker-logs migrate-up migrate-down rebuild quick-rebuild
 
 help:
 	@echo "Available commands:"
@@ -11,6 +11,8 @@ help:
 	@echo "  make docker-logs    - View logs from all services"
 	@echo "  make migrate-up     - Run database migrations"
 	@echo "  make migrate-down   - Rollback database migrations"
+	@echo "  make rebuild        - Full rebuild (stops, rebuilds, and restarts all services)"
+	@echo "  make quick-rebuild  - Quick rebuild (only backend, keeps database)"
 
 build:
 	go build -o bin/server cmd/server/main.go
@@ -47,3 +49,9 @@ dev: docker-up migrate-up
 	@echo "Backend server: http://localhost:8080"
 	@echo "PostgreSQL: localhost:5432"
 	@echo "Redis: localhost:6379"
+
+rebuild:
+	@./scripts/rebuild.sh
+
+quick-rebuild:
+	@./scripts/quick-rebuild.sh

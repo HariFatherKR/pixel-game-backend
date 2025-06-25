@@ -9,7 +9,6 @@ import (
 	"github.com/yourusername/pixel-game/internal/config"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	_ "github.com/yourusername/pixel-game/docs"
 )
 
 // @title Pixel Game API
