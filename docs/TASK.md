@@ -1,130 +1,141 @@
-# Backend Development Tasks
+# 백엔드 개발 태스크
 
-## Phase Progress
+## 페이즈별 진행 상황
 
-### ✅ Phase 1: Basic Backend Setup
-- [x] Project structure setup
-- [x] Database configuration (PostgreSQL)
-- [x] Redis configuration
-- [x] Docker setup
-- [x] Basic API server with Gin
-- [x] Environment configuration
+### ✅ 페이즈 1: 기본 백엔드 설정
+- [x] 프로젝트 구조 설정
+- [x] 데이터베이스 설정 (PostgreSQL)
+- [x] Redis 설정
+- [x] Docker 설정
+- [x] Gin을 사용한 기본 API 서버
+- [x] 환경 설정
 
-### ✅ Phase 2: User Authentication System
-- [x] User registration API
-- [x] User login API
-- [x] JWT token implementation
-- [x] Auth middleware
-- [x] Refresh token mechanism
-- [x] User profile API
+### ✅ 페이즈 2: 사용자 인증 시스템
+- [x] 사용자 등록 API
+- [x] 사용자 로그인 API
+- [x] JWT 토큰 구현
+- [x] 인증 미들웨어
+- [x] 리프레시 토큰 메커니즘
+- [x] 사용자 프로필 API
 
-### ✅ Phase 3: Card System
-- [x] Card master data model
-- [x] Card repository implementation
-- [x] Card CRUD APIs
-- [x] User card collection system
-- [x] Card instance management
+### ✅ 페이즈 3: 카드 시스템
+- [x] 카드 마스터 데이터 모델
+- [x] 카드 리포지토리 구현
+- [x] 카드 CRUD API
+- [x] 사용자 카드 컬렉션 시스템
+- [x] 카드 인스턴스 관리
 
-### ✅ Phase 4: Deck Building System
-- [x] Deck data model
-- [x] Deck CRUD APIs
-- [x] Deck validation (30 cards)
-- [x] Active deck selection
-- [x] Deck list API
+### ✅ 페이즈 4: 덱 빌딩 시스템
+- [x] 덱 데이터 모델
+- [x] 덱 CRUD API
+- [x] 덱 유효성 검사 (30장)
+- [x] 활성 덱 선택
+- [x] 덱 목록 API
 
-### ✅ Phase 5: Real-time WebSocket
-- [x] WebSocket server setup
-- [x] Connection management
-- [x] Message broadcasting
-- [x] Event system
-- [x] Client state synchronization
+### ✅ 페이즈 5: 실시간 WebSocket
+- [x] WebSocket 서버 설정
+- [x] 연결 관리
+- [x] 메시지 브로드캐스팅
+- [x] 이벤트 시스템
+- [x] 클라이언트 상태 동기화
 
-### ✅ Phase 6: Game Play System
-- [x] Game session model
-- [x] Game state management
-- [x] Turn-based logic
-- [x] Action validation
-- [x] Victory/defeat conditions
-- [x] Database migrations
+### ✅ 페이즈 6: 게임 플레이 시스템
+- [x] 게임 세션 모델
+- [x] 게임 상태 관리
+- [x] 턴 기반 로직
+- [x] 액션 검증
+- [x] 승리/패배 조건
+- [x] 데이터베이스 마이그레이션
 
-### ✅ Phase 7: Card Effect Engine
-- [x] Card effect interface design
-- [x] Effect registry system
-- [x] Basic effects implementation:
-  - [x] Damage effects (single, multi-hit, area)
-  - [x] Shield effects (basic, reflect, barricade)
-  - [x] Draw effects (draw, scry, draw-to-hand)
-  - [x] Buff/debuff effects (strength, dexterity, vulnerable, weak, frail)
-  - [x] Special effects (energy, heal, exhaust, retain, double-play)
-- [x] Effect executor integration
-- [x] Effect testing suite
+### ✅ 페이즈 7: 카드 효과 엔진
+- [x] 카드 효과 인터페이스 설계
+- [x] 효과 레지스트리 시스템
+- [x] 기본 효과 구현:
+  - [x] 데미지 효과 (단일, 다중 히트, 광역)
+  - [x] 방어 효과 (기본, 반사, 바리케이드)
+  - [x] 드로우 효과 (드로우, 예지, 핸드 채우기)
+  - [x] 버프/디버프 효과 (힘, 민첩, 취약, 약화, 연약)
+  - [x] 특수 효과 (에너지, 회복, 소멸, 보존, 이중 시전)
+- [x] 효과 실행기 통합
+- [x] 효과 테스트 스위트
 
-### 🔄 Phase 8: Enemy AI System
-- [ ] Enemy behavior patterns
-- [ ] Intent system
-- [ ] AI decision making
-- [ ] Different enemy types
+### ✅ 페이즈 8: 적 AI 시스템
+- [x] 적 AI 인터페이스 설계
+- [x] 기본 적 행동 패턴 (공격적, 방어적, 균형)
+- [x] 의도 시스템 구현
+- [x] 적 능력 시스템 구현
+- [x] AI 의사결정 로직 구현
+- [x] 다양한 적 타입 생성
+- [x] AI 시스템 테스트
 
-### 🔄 Phase 9: Reward System  
-- [ ] Battle rewards
-- [ ] Card reward selection
-- [ ] Gold/currency system
-- [ ] Card upgrade system
+### 🔄 페이즈 9: 보상 시스템  
+- [ ] 전투 보상
+- [ ] 카드 보상 선택
+- [ ] 골드/화폐 시스템
+- [ ] 카드 업그레이드 시스템
 
-### 🔄 Phase 10: Campaign Progress
-- [ ] Stage progression
-- [ ] Path selection
-- [ ] Save/load game state
-- [ ] Achievement system
+### 🔄 페이즈 10: 캠페인 진행
+- [ ] 스테이지 진행
+- [ ] 경로 선택
+- [ ] 게임 상태 저장/불러오기
+- [ ] 업적 시스템
 
-## Recent Updates (2025-06-25)
+## 최근 업데이트 (2025-06-25)
 
-### Phase 6 Completed:
-- Implemented comprehensive game domain models
-- Created game repository with PostgreSQL
-- Added game handlers for all game actions
-- Set up turn-based combat system
-- Integrated with user stats tracking
+### 페이즈 6 완료:
+- 포괄적인 게임 도메인 모델 구현
+- PostgreSQL을 사용한 게임 리포지토리 생성
+- 모든 게임 액션에 대한 핸들러 추가
+- 턴 기반 전투 시스템 설정
+- 사용자 통계 추적과 통합
 
-### Phase 7 Completed:
-- Designed extensible card effect interface
-- Implemented effect registry with factory pattern
-- Created 20+ different card effects
-- Integrated effect executor with game handler
-- Added comprehensive test suite (all tests passing)
+### 페이즈 7 완료:
+- 확장 가능한 카드 효과 인터페이스 설계
+- 팩토리 패턴을 사용한 효과 레지스트리 구현
+- 20개 이상의 다양한 카드 효과 생성
+- 게임 핸들러와 효과 실행기 통합
+- 포괄적인 테스트 스위트 추가 (모든 테스트 통과)
 
-## Next Steps
+### 페이즈 8 완료:
+- 지능형 적 AI 시스템 구현
+- 3가지 AI 패턴 (공격적, 방어적, 균형) 구현
+- 상황별 적응형 의사결정 로직
+- 층수별 다양한 적 타입과 AI 매칭
+- AI 매니저를 통한 턴 처리 자동화
+- 포괄적인 AI 테스트 스위트 (모든 테스트 통과)
 
-### Phase 8: Enemy AI System
-1. Design enemy behavior interface
-2. Implement basic enemy patterns (aggressive, defensive, balanced)
-3. Create intent calculation system
-4. Add enemy-specific abilities
-5. Test AI decision making
+## 다음 단계
 
-### Technical Debt
-- [ ] Improve error handling in game handlers
-- [ ] Add more comprehensive logging
-- [ ] Optimize database queries for game state
-- [ ] Add performance monitoring
-- [ ] Implement rate limiting for game actions
+### 페이즈 9: 보상 시스템
+1. 전투 승리 보상 시스템 설계
+2. 카드 보상 선택 시스템 구현
+3. 골드/화폐 경제 시스템
+4. 카드 업그레이드 메커니즘
+5. 보상 밸런싱 및 테스트
 
-## API Endpoints Implemented
+### 기술 부채
+- [ ] 게임 핸들러의 에러 처리 개선
+- [ ] 더 포괄적인 로깅 추가
+- [ ] 게임 상태에 대한 데이터베이스 쿼리 최적화
+- [ ] 성능 모니터링 추가
+- [ ] 게임 액션에 대한 속도 제한 구현
 
-### Authentication
+## 구현된 API 엔드포인트
+
+### 인증
 - POST /api/v1/auth/register
 - POST /api/v1/auth/login
 - POST /api/v1/auth/refresh
 - GET /api/v1/auth/profile
 - PUT /api/v1/auth/profile
 
-### Cards
+### 카드
 - GET /api/v1/cards
 - GET /api/v1/cards/:id
 - GET /api/v1/cards/collection
 - POST /api/v1/cards/collection
 
-### Decks
+### 덱
 - GET /api/v1/decks
 - POST /api/v1/decks
 - GET /api/v1/decks/:id
@@ -132,7 +143,7 @@
 - DELETE /api/v1/decks/:id
 - PUT /api/v1/decks/:id/activate
 
-### Games
+### 게임
 - POST /api/v1/games/start
 - GET /api/v1/games/current
 - GET /api/v1/games/:id
@@ -144,56 +155,56 @@
 ### WebSocket
 - WS /ws
 
-## Database Schema
+## 데이터베이스 스키마
 
-### Users
-- users table with authentication
-- user_profiles for game data
-- user_cards for collection
-- user_stats for statistics
+### 사용자
+- users 테이블 (인증)
+- user_profiles (게임 데이터)
+- user_cards (컬렉션)
+- user_stats (통계)
 
-### Cards
-- cards master data
-- user_cards instances
+### 카드
+- cards 마스터 데이터
+- user_cards 인스턴스
 
-### Games
+### 게임
 - game_sessions
 - game_actions
-- Complex game state in JSONB
+- JSONB로 저장된 복잡한 게임 상태
 
-### Decks
-- decks with user ownership
-- Card list in JSONB
+### 덱
+- 사용자 소유권이 있는 decks
+- JSONB로 저장된 카드 목록
 
-## Testing
+## 테스트
 
-### Unit Tests
-- Card effect system: ✅ All passing
-- Effect registry: ✅ Working
-- Effect executor: ✅ Integrated
+### 단위 테스트
+- 카드 효과 시스템: ✅ 모두 통과
+- 효과 레지스트리: ✅ 작동 중
+- 효과 실행기: ✅ 통합 완료
 
-### Integration Tests Needed
-- [ ] Full game flow test
-- [ ] WebSocket communication test
-- [ ] Database transaction tests
+### 필요한 통합 테스트
+- [ ] 전체 게임 플로우 테스트
+- [ ] WebSocket 통신 테스트
+- [ ] 데이터베이스 트랜잭션 테스트
 
-## Performance Considerations
+## 성능 고려사항
 
-1. **Game State Storage**: Using JSONB for flexible schema
-2. **Real-time Updates**: WebSocket for live game updates
-3. **Card Effects**: Efficient effect resolution system
-4. **Caching**: Redis for session management
+1. **게임 상태 저장**: 유연한 스키마를 위한 JSONB 사용
+2. **실시간 업데이트**: 라이브 게임 업데이트를 위한 WebSocket
+3. **카드 효과**: 효율적인 효과 해결 시스템
+4. **캐싱**: 세션 관리를 위한 Redis
 
-## Security Measures
+## 보안 조치
 
-1. **JWT Authentication**: Secure token-based auth
-2. **Input Validation**: All endpoints validated
-3. **SQL Injection Prevention**: Using parameterized queries
-4. **Rate Limiting**: TODO - implement for game actions
+1. **JWT 인증**: 안전한 토큰 기반 인증
+2. **입력 검증**: 모든 엔드포인트 검증
+3. **SQL 인젝션 방지**: 매개변수화된 쿼리 사용
+4. **속도 제한**: TODO - 게임 액션에 대한 구현 필요
 
-## Deployment Notes
+## 배포 노트
 
-1. Docker containers for all services
-2. Environment-based configuration
-3. Database migrations automated
-4. Swagger documentation included
+1. 모든 서비스에 대한 Docker 컨테이너
+2. 환경 기반 구성
+3. 자동화된 데이터베이스 마이그레이션
+4. Swagger 문서 포함

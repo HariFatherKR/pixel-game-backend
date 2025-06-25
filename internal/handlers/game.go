@@ -10,6 +10,7 @@ import (
 	"github.com/yourusername/pixel-game/internal/auth"
 	"github.com/yourusername/pixel-game/internal/domain"
 	"github.com/yourusername/pixel-game/internal/game/effects"
+	"github.com/yourusername/pixel-game/internal/game/ai"
 	"github.com/yourusername/pixel-game/internal/middleware"
 )
 
@@ -20,6 +21,7 @@ type GameHandler struct {
 	userRepo       domain.UserRepository
 	jwtManager     *auth.JWTManager
 	effectExecutor *effects.Executor
+	aiManager      *ai.AIManager
 }
 
 // NewGameHandler creates a new game handler
@@ -30,6 +32,7 @@ func NewGameHandler(gameRepo domain.GameRepository, cardRepo domain.CardReposito
 		userRepo:       userRepo,
 		jwtManager:     jwtManager,
 		effectExecutor: effects.NewExecutor(),
+		aiManager:      ai.NewAIManager(),
 	}
 }
 
@@ -724,22 +727,127 @@ func (h *GameHandler) GetGameStats(c *gin.Context) {
 // Helper methods
 
 func (h *GameHandler) generateEnemy(floor int, gameMode domain.GameMode) *domain.EnemyState {
-	// TODO: Implement proper enemy generation based on floor and game mode
-	return &domain.EnemyState{
-		ID:        "enemy_001",
-		Name:      "사이버 스컬지",
-		Health:    50 + (floor * 10),
-		MaxHealth: 50 + (floor * 10),
-		Shield:    0,
-		Intent: domain.EnemyIntent{
-			Type:        "ATTACK",
-			Value:       10,
-			Description: "10 데미지 공격 준비 중",
-		},
+	// 층수에 따른 적 타입 결정
+	var enemyType, enemyName, aiType string
+	baseHealth := 40
+	
+	switch {
+	case floor <= 2:
+		enemyType = "BASIC_ENEMY"
+		enemyName = "사이버 드론"
+		aiType = "balanced"
+		baseHealth = 40
+	case floor <= 4:
+		enemyType = "BRUTE"
+		enemyName = "사이버 워리어"
+		aiType = "aggressive"
+		baseHealth = 60
+	case floor <= 6:
+		enemyType = "GUARDIAN"
+		enemyName = "사이버 가디언"
+		aiType = "defensive"
+		baseHealth = 80
+	case floor%3 == 0: // 보스급
+		enemyType = "ELITE"
+		enemyName = "사이버 로드"
+		aiType = "balanced"
+		baseHealth = 120
+	default:
+		enemyType = "BASIC_ENEMY"
+		enemyName = "사이버 스컬지"
+		aiType = "balanced"
+		baseHealth = 50
+	}
+	
+	// 체력 계산 (층수에 따라 증가)
+	maxHealth := baseHealth + (floor * 8)
+	
+	// 적 상태 생성
+	enemy := &domain.EnemyState{
+		ID:           fmt.Sprintf("enemy_%d_%s", floor, enemyType),
+		Name:         enemyName,
+		Health:       maxHealth,
+		MaxHealth:    maxHealth,
+		Shield:       0,
 		ActivePowers: []domain.PowerState{},
 		Buffs:        []domain.BuffState{},
 		Debuffs:      []domain.DebuffState{},
 	}
+	
+	// AI 시스템을 사용해서 첫 번째 의도 계산
+	intent, err := h.generateInitialIntent(enemy, aiType, floor)
+	if err != nil {
+		// 에러 시 기본 의도 설정
+		enemy.Intent = domain.EnemyIntent{
+			Type:        "ATTACK",
+			Value:       10 + floor,
+			Description: fmt.Sprintf("%d 데미지 공격 준비 중", 10+floor),
+		}
+	} else {
+		enemy.Intent = *intent
+	}
+	
+	return enemy
+}
+
+// generateInitialIntent AI를 사용해서 초기 의도 생성
+func (h *GameHandler) generateInitialIntent(enemy *domain.EnemyState, aiType string, floor int) (*domain.EnemyIntent, error) {
+	// 기본 플레이어 상태 (초기 의도 계산용)
+	dummyPlayer := &domain.PlayerState{
+		Health:    80,
+		MaxHealth: 80,
+		Shield:    0,
+		Energy:    3,
+		ActivePowers: make(map[string]domain.PowerState),
+		Buffs:        []domain.BuffState{},
+		Debuffs:      []domain.DebuffState{},
+	}
+	
+	// 기본 게임 상태
+	dummyGameState := &domain.GameState{}
+	
+	return h.aiManager.CalculateNextIntent(
+		enemy,
+		dummyPlayer,
+		dummyGameState,
+		0, // 초기 턴
+		floor,
+		aiType,
+	)
+}
+
+// getAITypeFromEnemyID 적 ID에서 AI 타입 추출
+func (h *GameHandler) getAITypeFromEnemyID(enemyID string) string {
+	// 적 ID에서 타입 추출 (예: "enemy_1_BRUTE" -> "aggressive")
+	if contains(enemyID, "BRUTE") {
+		return "aggressive"
+	}
+	if contains(enemyID, "GUARDIAN") {
+		return "defensive"
+	}
+	if contains(enemyID, "ELITE") {
+		return "balanced"
+	}
+	return "balanced" // 기본값
+}
+
+// contains 문자열 포함 여부 확인 헬퍼
+func contains(str, substr string) bool {
+	return len(str) >= len(substr) && 
+		   (str == substr || 
+		    str[:len(substr)] == substr || 
+		    str[len(str)-len(substr):] == substr ||
+		    indexOf(str, substr) >= 0)
+}
+
+// indexOf 문자열 인덱스 찾기 헬퍼
+func indexOf(str, substr string) int {
+	for i := 0; i <= len(str)-len(substr); i++ {
+		if str[i:i+len(substr)] == substr {
+			return i
+		}
+	}
+	return -1
 }
 
 func (h *GameHandler) generatePath(gameMode domain.GameMode) []domain.FloorNode {
@@ -823,10 +931,22 @@ func (h *GameHandler) processUsePotion(session *domain.GameSession, playerState 
 func (h *GameHandler) processEnemyTurn(session *domain.GameSession, playerState *domain.PlayerState, enemyState *domain.EnemyState, gameState *domain.GameState) []map[string]interface{} {
 	actions := []map[string]interface{}{}
 
-	// Process enemy intent
-	switch enemyState.Intent.Type {
-	case "ATTACK":
-		damage := enemyState.Intent.Value
+	// AI 타입 결정 (적 ID에서 추출 또는 기본값)
+	aiType := h.getAITypeFromEnemyID(enemyState.ID)
+	
+	// AI 시스템을 사용해서 적 턴 처리
+	aiResult, err := h.aiManager.ProcessEnemyTurn(
+		enemyState,
+		playerState,
+		gameState,
+		session.CurrentTurn,
+		session.CurrentFloor,
+		aiType,
+	)
+	
+	if err != nil {
+		// AI 처리 실패시 기본 공격
+		damage := 10 + session.CurrentFloor
 		actualDamage := playerState.ApplyDamage(damage)
 		session.DamageTaken += actualDamage
 		
@@ -835,22 +955,47 @@ func (h *GameHandler) processEnemyTurn(session *domain.GameSession, playerState 
 			"damage": damage,
 			"actual_damage": actualDamage,
 			"shield_blocked": damage - actualDamage,
+			"message": fmt.Sprintf("적이 %d 데미지로 공격했습니다!", actualDamage),
 		})
-	case "DEFEND":
-		enemyState.Shield += enemyState.Intent.Value
-		actions = append(actions, map[string]interface{}{
-			"type": "defend",
-			"shield": enemyState.Intent.Value,
-		})
-	// TODO: Implement more enemy actions
-	}
-
-	// Generate next intent
-	// TODO: Implement proper enemy AI
-	enemyState.Intent = domain.EnemyIntent{
-		Type:        "ATTACK",
-		Value:       10 + session.CurrentFloor,
-		Description: fmt.Sprintf("%d 데미지 공격 준비 중", 10 + session.CurrentFloor),
+		
+		// 기본 다음 의도 설정
+		enemyState.Intent = domain.EnemyIntent{
+			Type:        "ATTACK",
+			Value:       damage,
+			Description: fmt.Sprintf("%d 데미지 공격 준비 중", damage),
+		}
+	} else {
+		// AI 결과를 액션으로 변환
+		action := map[string]interface{}{
+			"type": aiResult.Action.Type,
+			"description": aiResult.Action.Description,
+			"success": aiResult.Success,
+		}
+		
+		// 결과에 따른 추가 정보
+		if aiResult.Damage > 0 {
+			action["damage"] = aiResult.Damage
+			session.DamageTaken += aiResult.Damage
+		}
+		if aiResult.Shield > 0 {
+			action["shield"] = aiResult.Shield
+		}
+		if len(aiResult.Buffs) > 0 {
+			action["buffs_applied"] = aiResult.Buffs
+		}
+		if len(aiResult.Debuffs) > 0 {
+			action["debuffs_applied"] = aiResult.Debuffs
+		}
+		if len(aiResult.Messages) > 0 {
+			action["messages"] = aiResult.Messages
+		}
+		
+		actions = append(actions, action)
+		
+		// 다음 의도 설정
+		if aiResult.NextIntent != nil {
+			enemyState.Intent = *aiResult.NextIntent
+		}
 	}
 
 	return actions
