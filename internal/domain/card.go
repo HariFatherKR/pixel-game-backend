@@ -50,10 +50,11 @@ type UserCard struct {
 
 // CardEffect represents the structured effect data
 type CardEffect struct {
-	Type       string                 `json:"type"`
-	Target     string                 `json:"target"`
-	Value      int                    `json:"value"`
-	Conditions map[string]interface{} `json:"conditions,omitempty"`
+	Type       string          `json:"type"`
+	Target     string          `json:"target"`
+	Value      int             `json:"value"`
+	Parameters json.RawMessage `json:"parameters,omitempty"`
+	Conditions json.RawMessage `json:"conditions,omitempty"`
 }
 
 // VisualEffect represents the visual effect data

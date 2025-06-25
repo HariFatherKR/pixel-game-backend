@@ -20,6 +20,9 @@ RUN go mod tidy
 RUN go install github.com/swaggo/swag/cmd/swag@latest || true
 RUN swag init -g cmd/server/main.go --parseDependency --parseInternal -o ./docs --ot json,yaml || true
 
+# Run tests (allow failure for now)
+RUN go test ./... -v || true
+
 # Build the application
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main cmd/server/main.go
 

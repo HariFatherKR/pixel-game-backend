@@ -9,24 +9,27 @@ import (
 	"github.com/google/uuid"
 	"github.com/yourusername/pixel-game/internal/auth"
 	"github.com/yourusername/pixel-game/internal/domain"
+	"github.com/yourusername/pixel-game/internal/game/effects"
 	"github.com/yourusername/pixel-game/internal/middleware"
 )
 
 // GameHandler handles game-related HTTP requests
 type GameHandler struct {
-	gameRepo   domain.GameRepository
-	cardRepo   domain.CardRepository
-	userRepo   domain.UserRepository
-	jwtManager *auth.JWTManager
+	gameRepo       domain.GameRepository
+	cardRepo       domain.CardRepository
+	userRepo       domain.UserRepository
+	jwtManager     *auth.JWTManager
+	effectExecutor *effects.Executor
 }
 
 // NewGameHandler creates a new game handler
 func NewGameHandler(gameRepo domain.GameRepository, cardRepo domain.CardRepository, userRepo domain.UserRepository, jwtManager *auth.JWTManager) *GameHandler {
 	return &GameHandler{
-		gameRepo:   gameRepo,
-		cardRepo:   cardRepo,
-		userRepo:   userRepo,
-		jwtManager: jwtManager,
+		gameRepo:       gameRepo,
+		cardRepo:       cardRepo,
+		userRepo:       userRepo,
+		jwtManager:     jwtManager,
+		effectExecutor: effects.NewExecutor(),
 	}
 }
 
@@ -786,8 +789,12 @@ func (h *GameHandler) processPlayCard(session *domain.GameSession, playerState *
 	}
 	playerState.Hand = newHand
 
-	// Process card effects
-	effects := h.processCardEffects(card, playerState, enemyState, targetID)
+	// Process card effects using the effect executor
+	executionResult, err := h.effectExecutor.ExecuteCardEffects(card, playerState, enemyState, gameState, targetID)
+	if err != nil {
+		return nil, fmt.Errorf("카드 효과 실행 실패: %w", err)
+	}
+	effects := executionResult.ToMap()
 
 	// Add card to discard pile (unless it exhausts)
 	if card.Type != domain.CardTypePower {
@@ -807,46 +814,6 @@ func (h *GameHandler) processPlayCard(session *domain.GameSession, playerState *
 	}, nil
 }
 
-func (h *GameHandler) processCardEffects(card *domain.Card, playerState *domain.PlayerState, enemyState *domain.EnemyState, targetID *string) map[string]interface{} {
-	effects := make(map[string]interface{})
-	
-	// Parse card effects
-	cardEffects, err := card.GetEffects()
-	if err != nil {
-		return effects
-	}
-
-	for _, effect := range cardEffects {
-		switch effect.Type {
-		case "damage":
-			if effect.Target == "enemy" {
-				damage := effect.Value
-				enemyState.Health -= damage
-				if enemyState.Health < 0 {
-					enemyState.Health = 0
-				}
-				effects["damage_dealt"] = damage
-			}
-		case "shield":
-			if effect.Target == "self" {
-				playerState.GainShield(effect.Value)
-				effects["shield_gained"] = effect.Value
-			}
-		case "heal":
-			if effect.Target == "self" {
-				healAmount := effect.Value
-				playerState.Heal(healAmount)
-				effects["health_restored"] = healAmount
-			}
-		case "draw":
-			drawn := playerState.DrawCards(effect.Value)
-			effects["cards_drawn"] = drawn
-		// TODO: Implement more effect types
-		}
-	}
-
-	return effects
-}
 
 func (h *GameHandler) processUsePotion(session *domain.GameSession, playerState *domain.PlayerState, enemyState *domain.EnemyState, gameState *domain.GameState, actionData json.RawMessage) (map[string]interface{}, error) {
 	// TODO: Implement potion usage

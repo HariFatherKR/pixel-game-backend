@@ -2,6 +2,7 @@ package entity
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -89,5 +90,5 @@ func NewCardInstance(card *Card, upgraded bool) *CardInstance {
 
 func generateInstanceID() string {
 	// Simple implementation - in production use UUID
-	return time.Now().Format("20060102150405") + "-" + string(time.Now().UnixNano()%1000)
+	return time.Now().Format("20060102150405") + "-" + fmt.Sprintf("%03d", time.Now().UnixNano()%1000)
 }
