@@ -33,6 +33,10 @@ type Card struct {
 	CodeSnippet   string          `json:"code_snippet" db:"code_snippet"`
 	Effects       json.RawMessage `json:"effects" db:"effects"`
 	VisualEffects json.RawMessage `json:"visual_effects" db:"visual_effects"`
+	ImageURL      string          `json:"image_url" db:"image_url"`
+	BaseDamage    int             `json:"base_damage" db:"base_damage"`
+	BaseBlock     int             `json:"base_block" db:"base_block"`
+	DrawAmount    int             `json:"draw_amount" db:"draw_amount"`
 	CreatedAt     time.Time       `json:"created_at" db:"created_at"`
 }
 

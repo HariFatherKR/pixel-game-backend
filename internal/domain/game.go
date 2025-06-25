@@ -73,6 +73,7 @@ type PlayerState struct {
 	DrawPile     []string              `json:"draw_pile"`    // Card IDs in draw pile
 	DiscardPile  []string              `json:"discard_pile"` // Card IDs in discard pile
 	ExhaustPile  []string              `json:"exhaust_pile"` // Card IDs removed from play
+	Deck         []string              `json:"deck"`         // Player's deck card IDs
 	ActivePowers map[string]PowerState `json:"active_powers"`
 	Buffs        []BuffState           `json:"buffs"`
 	Debuffs      []DebuffState         `json:"debuffs"`

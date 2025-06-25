@@ -14,6 +14,8 @@ import (
 	"github.com/yourusername/pixel-game/internal/handlers"
 	"github.com/yourusername/pixel-game/internal/middleware"
 	"github.com/yourusername/pixel-game/internal/repository/postgres"
+	"github.com/yourusername/pixel-game/internal/game/rewards"
+	"github.com/yourusername/pixel-game/internal/websocket"
 	"github.com/yourusername/pixel-game/internal/swagger"
 	_ "github.com/yourusername/pixel-game/docs"
 )
@@ -65,11 +67,22 @@ func main() {
 	}
 	jwtManager := auth.NewJWTManager(jwtSecretKey)
 
+	// Initialize reward system
+	rewardRepository := postgres.NewRewardRepository(db)
+	rewardGenerator := rewards.NewBasicRewardGenerator(cardRepository)
+	rewardManager := rewards.NewRewardManager(rewardGenerator, rewardRepository, cardRepository, userRepository)
+	upgradeService := rewards.NewCardUpgradeService(cardRepository, cardRepository)
+
+	// Initialize WebSocket hub
+	wsHub := websocket.NewHub()
+	go wsHub.Run()
+
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(jwtManager, userRepository, cardRepository)
 	userHandler := handlers.NewUserHandler(userRepository)
 	cardHandler := handlers.NewCardHandler(cardRepository, jwtManager)
-	gameHandler := handlers.NewGameHandler(gameRepository, cardRepository, userRepository, jwtManager)
+	gameHandler := handlers.NewGameHandler(gameRepository, cardRepository, userRepository, jwtManager, rewardManager, upgradeService, wsHub)
+	wsHandler := handlers.NewWebSocketHandler(wsHub, jwtManager)
 
 	// Initialize router
 	r := gin.Default()
@@ -137,6 +150,9 @@ func main() {
 		
 		// Game endpoints
 		gameHandler.RegisterRoutes(api)
+		
+		// WebSocket endpoints
+		wsHandler.RegisterRoutes(api)
 		
 		// Version endpoint
 		api.GET("/version", GetVersion)
