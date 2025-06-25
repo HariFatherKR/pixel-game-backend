@@ -54,6 +54,7 @@ func main() {
 
 	// Initialize repositories
 	userRepository := postgres.NewUserRepository(db.DB)
+	cardRepository := postgres.NewCardRepository(db.DB)
 
 	// Initialize JWT manager
 	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
@@ -64,8 +65,9 @@ func main() {
 	jwtManager := auth.NewJWTManager(jwtSecretKey)
 
 	// Initialize handlers
-	authHandler := handlers.NewAuthHandler(jwtManager, userRepository)
+	authHandler := handlers.NewAuthHandler(jwtManager, userRepository, cardRepository)
 	userHandler := handlers.NewUserHandler(userRepository)
+	cardHandler := handlers.NewCardHandler(cardRepository, jwtManager)
 
 	// Initialize router
 	r := gin.Default()
@@ -128,13 +130,8 @@ func main() {
 			users.POST("/stats/play-time/:seconds", userHandler.AddPlayTime)
 		}
 		
-		// Card endpoints (optional auth for future features)
-		cards := api.Group("/cards")
-		cards.Use(middleware.OptionalAuthMiddleware(jwtManager))
-		{
-			cards.GET("", GetCards)
-			cards.GET("/:id", GetCard)
-		}
+		// Card endpoints
+		cardHandler.RegisterRoutes(api)
 		
 		// Version endpoint
 		api.GET("/version", GetVersion)
@@ -169,45 +166,6 @@ func HealthCheck(c *gin.Context) {
 	})
 }
 
-// GetCards godoc
-// @Summary      카드 목록 조회
-// @Description  게임에서 사용 가능한 모든 카드 목록을 조회합니다. 각 카드는 고유한 코드 효과를 가지고 있습니다.
-// @Tags         cards
-// @Accept       json
-// @Produce      json
-// @Success      200  {object}  CardsResponse  "카드 목록"
-// @Router       /cards [get]
-func GetCards(c *gin.Context) {
-	c.JSON(http.StatusOK, CardsResponse{
-		Cards: []Card{
-			{ID: 1, Name: "Code Slash", Type: "action", Cost: 2, Description: "Deal 8 damage and apply Vulnerable"},
-			{ID: 2, Name: "Firewall Up", Type: "action", Cost: 1, Description: "Gain 10 Shield"},
-			{ID: 3, Name: "Bug Found", Type: "event", Cost: 0, Description: "Disable all traps, gain 1 random card"},
-		},
-		Total: 3,
-	})
-}
-
-// GetCard godoc
-// @Summary      카드 상세 조회
-// @Description  특정 카드의 상세 정보를 조회합니다. 카드의 코드 효과와 시각적 효과 정보를 포함합니다.
-// @Tags         cards
-// @Accept       json
-// @Produce      json
-// @Param        id   path      int  true  "카드 ID"
-// @Success      200  {object}  Card          "카드 상세 정보"
-// @Failure      404  {object}  ErrorResponse "카드를 찾을 수 없음"
-// @Router       /cards/{id} [get]
-func GetCard(c *gin.Context) {
-	// This is a placeholder implementation
-	c.JSON(http.StatusOK, Card{
-		ID:          1,
-		Name:        "Code Slash",
-		Type:        "action",
-		Cost:        2,
-		Description: "Deal 8 damage and apply Vulnerable",
-	})
-}
 
 // GetVersion godoc
 // @Summary      Get API version
@@ -233,20 +191,6 @@ type HealthResponse struct {
 	Timestamp int64  `json:"timestamp" example:"1234567890"`
 }
 
-// Card represents a game card
-type Card struct {
-	ID          int    `json:"id" example:"1"`
-	Name        string `json:"name" example:"Code Slash"`
-	Type        string `json:"type" example:"action" enums:"action,event,power"`
-	Cost        int    `json:"cost" example:"2"`
-	Description string `json:"description" example:"Deal 8 damage and apply Vulnerable"`
-}
-
-// CardsResponse represents the cards list response
-type CardsResponse struct {
-	Cards []Card `json:"cards"`
-	Total int    `json:"total" example:"3"`
-}
 
 // VersionResponse represents the version info response
 type VersionResponse struct {

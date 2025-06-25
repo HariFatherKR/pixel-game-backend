@@ -11,12 +11,14 @@ import (
 type AuthHandler struct {
 	jwtManager     *auth.JWTManager
 	userRepository domain.UserRepository
+	cardRepository domain.CardRepository
 }
 
-func NewAuthHandler(jwtManager *auth.JWTManager, userRepository domain.UserRepository) *AuthHandler {
+func NewAuthHandler(jwtManager *auth.JWTManager, userRepository domain.UserRepository, cardRepository domain.CardRepository) *AuthHandler {
 	return &AuthHandler{
 		jwtManager:     jwtManager,
 		userRepository: userRepository,
+		cardRepository: cardRepository,
 	}
 }
 
@@ -126,6 +128,24 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	profile, err := h.userRepository.GetProfile(user.ID)
 	if err != nil {
 		profile = nil
+	}
+
+	// Grant initial cards to new user
+	initialCards := []string{
+		"card_001", "card_001", "card_001", // 3x 해킹 스트라이크
+		"card_002", "card_002",              // 2x 코드 인젝션  
+		"card_008", "card_008", "card_008", // 3x 방화벽
+		"card_009", "card_009",              // 2x 백업
+		"card_014",                          // 1x 알고리즘 최적화
+		"card_018", "card_018",              // 2x 메모리 누수
+	}
+
+	for _, cardID := range initialCards {
+		userCard := &domain.UserCard{
+			UserID: user.ID,
+			CardID: cardID,
+		}
+		h.cardRepository.AddCardToUser(userCard)
 	}
 
 	accessToken, err := h.jwtManager.GenerateAccessToken(user.ID, user.Username)

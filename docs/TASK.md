@@ -40,11 +40,23 @@
 - [x] 플랫폼별 사용자 구분 (Android/iOS/Web)
 - [x] 게임 통계 업데이트 API 구현
 
-### 🚧 Phase 5: 카드 시스템 구현 (다음 목표)
-- [ ] 카드 도메인 모델 및 Repository 구현
-- [ ] 카드 목록 조회 API (`GET /api/v1/cards`)
-- [ ] 카드 상세 조회 API (`GET /api/v1/cards/:id`)
-- [ ] 사용자 카드 컬렉션 시스템 구현
+### ✅ Phase 5: 카드 시스템 구현 (완료)
+- [x] 카드 도메인 모델 및 Repository 구현
+- [x] 카드 목록 조회 API (`GET /api/v1/cards`)
+- [x] 카드 상세 조회 API (`GET /api/v1/cards/:id`)
+- [x] 사용자 카드 컬렉션 시스템 구현
+  - [x] 사용자 카드 컬렉션 조회 (`GET /api/v1/cards/my-collection`)
+  - [x] 신규 사용자 초기 카드 지급 시스템
+  - [x] 카드 중복 소유 가능하도록 DB 스키마 수정
+- [x] 덱 관리 시스템 구현
+  - [x] 덱 생성 API (`POST /api/v1/cards/decks`)
+  - [x] 덱 목록 조회 API (`GET /api/v1/cards/decks`)
+  - [x] 덱 상세 조회 API (`GET /api/v1/cards/decks/:id`)
+  - [x] 덱 수정 API (`PUT /api/v1/cards/decks/:id`)
+  - [x] 덱 삭제 API (`DELETE /api/v1/cards/decks/:id`)
+  - [x] 덱 활성화 API (`PUT /api/v1/cards/decks/:id/activate`)
+  - [x] 활성 덱 조회 API (`GET /api/v1/cards/decks/active`)
+- [x] 카드 마스터 데이터 시드 (20개 카드)
 - [ ] 카드 효과 처리 엔진 구현
 - [ ] 카드 업그레이드 시스템
 - [ ] 카드 시너지 계산 로직
@@ -87,19 +99,19 @@
 
 ## 🎯 현재 작업 중인 태스크
 
-### Phase 5: 카드 시스템 구현
-실제 게임 카드 데이터와 사용자 카드 컬렉션을 관리하는 시스템을 구현합니다.
+### Phase 6: 게임 플레이 시스템
+게임 세션 관리와 실제 카드 게임 플레이 로직을 구현합니다.
 
 **다음 작업:**
-1. Card 도메인 모델과 Repository 패턴 구현
-2. 카드 마스터 데이터 관리 시스템
-3. 사용자별 카드 컬렉션 시스템
-4. 카드 효과와 코드 실행 엔진 기초 구현
+1. 게임 세션 도메인 모델 설계
+2. 턴제 전투 시스템 구현
+3. 카드 효과 실행 엔진 구현
+4. 게임 상태 관리 및 동기화
 
 ## 📊 진행률
 
-- **전체 진행률**: 40% (4/10 Phase 완료)
-- **현재 Phase 진행률**: 0% (Phase 5 시작)
+- **전체 진행률**: 50% (5/10 Phase 완료)
+- **현재 Phase 진행률**: 0% (Phase 6 시작)
 
 ## 🔗 관련 문서
 
@@ -153,6 +165,32 @@
     - POST /api/v1/users/stats/* (통계 업데이트)
   - 플랫폼별 사용자 구분 (Web, Android, iOS)
   - 데이터베이스 마이그레이션 (002_user_system_update)
+- 카드 시스템 구현 완료
+  - Card 도메인 모델 (internal/domain/card.go)
+    - 카드 타입: ACTION (액션), EVENT (이벤트), POWER (지속 효과)
+    - 카드 희귀도: COMMON, RARE, EPIC, LEGENDARY
+    - 카드 효과 및 시각 효과 JSON 데이터 구조
+  - Card Repository 구현 (internal/repository/postgres/card.go)
+    - 카드 마스터 데이터 CRUD
+    - 사용자 카드 컬렉션 관리
+    - 덱 시스템 (생성, 수정, 삭제, 활성화)
+  - 카드 API 핸들러 (internal/handlers/card.go)
+    - GET /api/v1/cards (카드 목록 - 필터, 페이지네이션 지원)
+    - GET /api/v1/cards/:id (카드 상세)
+    - GET /api/v1/cards/my-collection (내 컬렉션)
+    - POST /api/v1/cards/decks (덱 생성)
+    - GET /api/v1/cards/decks (내 덱 목록)
+    - GET /api/v1/cards/decks/:id (덱 상세)
+    - PUT /api/v1/cards/decks/:id (덱 수정)
+    - DELETE /api/v1/cards/decks/:id (덱 삭제)
+    - PUT /api/v1/cards/decks/:id/activate (덱 활성화)
+    - GET /api/v1/cards/decks/active (활성 덱 조회)
+  - 데이터베이스 마이그레이션
+    - 003_card_system: 카드, 사용자 카드, 덱 테이블 생성
+    - 004_seed_cards: 초기 카드 데이터 20개 시드
+    - 005_remove_unique_card_constraint: 카드 중복 소유 허용
+  - 신규 사용자 초기 카드 지급 시스템
+    - 회원가입 시 13장의 스타터 카드 자동 지급
 
 ### 다음 마일스톤
 - 카드 시스템 및 컬렉션 관리 구현

@@ -40,8 +40,17 @@ services:
         condition: service_healthy
     environment:
       - DATABASE_URL=postgres://pixelgame:pixelgame123@postgres:5432/pixelgame_db?sslmode=disable
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=pixelgame
+      - DB_PASSWORD=pixelgame123
+      - DB_NAME=pixelgame_db
+      - DB_SSL_MODE=disable
       - REDIS_URL=redis://redis:6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - JWT_SECRET=your-secret-key-here
+      - JWT_SECRET_KEY=your-secret-key-here
       - PORT=8080
     volumes:
       - ./migrations:/app/migrations
