@@ -24,50 +24,368 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/cards": {
-            "get": {
-                "description": "Get a list of all available cards",
+        "/auth/register": {
+            "post": {
+                "description": "Create a new user account",
                 "consumes": ["application/json"],
                 "produces": ["application/json"],
-                "tags": ["cards"],
-                "summary": "List all cards",
+                "tags": ["auth"],
+                "summary": "Register new user",
+                "parameters": [{
+                    "description": "User registration info",
+                    "name": "request",
+                    "in": "body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/RegisterRequest"
+                    }
+                }],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/main.CardsResponse"
+                            "$ref": "#/definitions/AuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/cards/{id}": {
+        "/auth/login": {
+            "post": {
+                "description": "Authenticate user and return JWT token",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["auth"],
+                "summary": "User login",
+                "parameters": [{
+                    "description": "Login credentials",
+                    "name": "request",
+                    "in": "body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/LoginRequest"
+                    }
+                }],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/AuthResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/cards": {
             "get": {
-                "description": "Get details of a specific card",
+                "security": [{"ApiKeyAuth": []}],
+                "description": "Get a list of all available cards with filtering and pagination",
                 "consumes": ["application/json"],
                 "produces": ["application/json"],
                 "tags": ["cards"],
-                "summary": "Get card by ID",
+                "summary": "List all cards",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Filter by card type",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by rarity",
+                        "name": "rarity",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
-                        "description": "Card ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page",
+                        "name": "limit",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/main.Card"
+                            "$ref": "#/definitions/CardsResponse"
                         }
-                    },
-                    "404": {
-                        "description": "Not Found",
+                    }
+                }
+            }
+        },
+        "/cards/my-collection": {
+            "get": {
+                "security": [{"ApiKeyAuth": []}],
+                "description": "Get user's card collection",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["cards"],
+                "summary": "Get my card collection",
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/main.ErrorResponse"
+                            "type": "object",
+                            "properties": {
+                                "cards": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/UserCard"
+                                    }
+                                },
+                                "total": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/cards/decks": {
+            "get": {
+                "security": [{"ApiKeyAuth": []}],
+                "description": "Get user's decks",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["decks"],
+                "summary": "List my decks",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "decks": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Deck"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [{"ApiKeyAuth": []}],
+                "description": "Create a new deck",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["decks"],
+                "summary": "Create deck",
+                "parameters": [{
+                    "description": "Deck creation request",
+                    "name": "request",
+                    "in": "body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/CreateDeckRequest"
+                    }
+                }],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/Deck"
+                        }
+                    }
+                }
+            }
+        },
+        "/games/start": {
+            "post": {
+                "security": [{"ApiKeyAuth": []}],
+                "description": "Start a new game session",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["games"],
+                "summary": "Start game",
+                "parameters": [{
+                    "description": "Game start request",
+                    "name": "request",
+                    "in": "body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/StartGameRequest"
+                    }
+                }],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "session": {
+                                    "$ref": "#/definitions/GameSession"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/games/current": {
+            "get": {
+                "security": [{"ApiKeyAuth": []}],
+                "description": "Get user's current active game",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["games"],
+                "summary": "Get current game",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GameSession"
+                        }
+                    }
+                }
+            }
+        },
+        "/games/{id}": {
+            "get": {
+                "security": [{"ApiKeyAuth": []}],
+                "description": "Get specific game by ID",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["games"],
+                "summary": "Get game",
+                "parameters": [{
+                    "type": "string",
+                    "description": "Game ID",
+                    "name": "id",
+                    "in": "path",
+                    "required": true
+                }],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GameSession"
+                        }
+                    }
+                }
+            }
+        },
+        "/games/{id}/actions": {
+            "post": {
+                "security": [{"ApiKeyAuth": []}],
+                "description": "Play an action in the game",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["games"],
+                "summary": "Play action",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Game ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Action request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/PlayActionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/games/{id}/end-turn": {
+            "post": {
+                "security": [{"ApiKeyAuth": []}],
+                "description": "End the current turn",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["games"],
+                "summary": "End turn",
+                "parameters": [{
+                    "type": "string",
+                    "description": "Game ID",
+                    "name": "id",
+                    "in": "path",
+                    "required": true
+                }],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/games/{id}/surrender": {
+            "post": {
+                "security": [{"ApiKeyAuth": []}],
+                "description": "Surrender the game",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["games"],
+                "summary": "Surrender game",
+                "parameters": [{
+                    "type": "string",
+                    "description": "Game ID",
+                    "name": "id",
+                    "in": "path",
+                    "required": true
+                }],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/games/stats": {
+            "get": {
+                "security": [{"ApiKeyAuth": []}],
+                "description": "Get user's game statistics",
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["games"],
+                "summary": "Get game stats",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UserGameStats"
                         }
                     }
                 }
@@ -84,24 +402,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/main.HealthResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/version": {
-            "get": {
-                "description": "Get the current version of the API",
-                "consumes": ["application/json"],
-                "produces": ["application/json"],
-                "tags": ["system"],
-                "summary": "Get API version",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/main.VersionResponse"
+                            "$ref": "#/definitions/HealthResponse"
                         }
                     }
                 }
@@ -109,87 +410,327 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "main.Card": {
+        "RegisterRequest": {
             "type": "object",
+            "required": ["username", "email", "password", "platform"],
             "properties": {
-                "cost": {
-                    "type": "integer",
-                    "example": 2
-                },
-                "description": {
+                "username": {
                     "type": "string",
-                    "example": "Deal 8 damage and apply Vulnerable"
+                    "minLength": 3,
+                    "maxLength": 20
                 },
-                "id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "name": {
+                "email": {
                     "type": "string",
-                    "example": "Code Slash"
+                    "format": "email"
                 },
-                "type": {
+                "password": {
                     "type": "string",
-                    "enum": ["action", "event", "power"],
-                    "example": "action"
+                    "minLength": 6
+                },
+                "platform": {
+                    "type": "string",
+                    "enum": ["web", "android", "ios"]
                 }
             }
         },
-        "main.CardsResponse": {
+        "LoginRequest": {
+            "type": "object",
+            "required": ["username", "password"],
+            "properties": {
+                "username": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "AuthResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/UserResponse"
+                }
+            }
+        },
+        "UserResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "profile": {
+                    "$ref": "#/definitions/UserProfile"
+                }
+            }
+        },
+        "UserProfile": {
+            "type": "object",
+            "properties": {
+                "display_name": {
+                    "type": "string"
+                },
+                "avatar": {
+                    "type": "string"
+                },
+                "bio": {
+                    "type": "string"
+                },
+                "level": {
+                    "type": "integer"
+                },
+                "experience": {
+                    "type": "integer"
+                }
+            }
+        },
+        "CardsResponse": {
             "type": "object",
             "properties": {
                 "cards": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/main.Card"
+                        "$ref": "#/definitions/Card"
                     }
                 },
                 "total": {
-                    "type": "integer",
-                    "example": 3
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "limit": {
+                    "type": "integer"
                 }
             }
         },
-        "main.ErrorResponse": {
+        "Card": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": ["ACTION", "EVENT", "POWER"]
+                },
+                "rarity": {
+                    "type": "string",
+                    "enum": ["COMMON", "RARE", "EPIC", "LEGENDARY"]
+                },
+                "cost": {
+                    "type": "integer"
+                }
+            }
+        },
+        "StartGameRequest": {
+            "type": "object",
+            "required": ["game_mode"],
+            "properties": {
+                "game_mode": {
+                    "type": "string",
+                    "enum": ["STORY", "DAILY_CHALLENGE", "EVENT"]
+                },
+                "deck_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "GameSession": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "game_mode": {
+                    "type": "string"
+                },
+                "current_floor": {
+                    "type": "integer"
+                },
+                "current_turn": {
+                    "type": "integer"
+                },
+                "turn_phase": {
+                    "type": "string"
+                },
+                "player_state": {
+                    "type": "object"
+                },
+                "enemy_state": {
+                    "type": "object"
+                },
+                "game_state": {
+                    "type": "object"
+                }
+            }
+        },
+        "UserCard": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "card_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "card": {
+                    "$ref": "#/definitions/Card"
+                }
+            }
+        },
+        "Deck": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "card_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "is_active": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "CreateDeckRequest": {
+            "type": "object",
+            "required": ["name", "card_ids"],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "card_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 10,
+                    "maxItems": 30
+                }
+            }
+        },
+        "PlayActionRequest": {
+            "type": "object",
+            "required": ["action_type"],
+            "properties": {
+                "action_type": {
+                    "type": "string",
+                    "enum": ["PLAY_CARD", "END_TURN", "USE_POTION"]
+                },
+                "card_id": {
+                    "type": "string"
+                },
+                "target_id": {
+                    "type": "string"
+                },
+                "action_data": {
+                    "type": "object"
+                }
+            }
+        },
+        "UserGameStats": {
+            "type": "object",
+            "properties": {
+                "total_games": {
+                    "type": "integer"
+                },
+                "games_won": {
+                    "type": "integer"
+                },
+                "games_lost": {
+                    "type": "integer"
+                },
+                "win_rate": {
+                    "type": "number"
+                },
+                "highest_floor": {
+                    "type": "integer"
+                },
+                "total_score": {
+                    "type": "integer"
+                },
+                "highest_score": {
+                    "type": "integer"
+                },
+                "total_play_time": {
+                    "type": "integer"
+                },
+                "average_game_time": {
+                    "type": "integer"
+                },
+                "favorite_cards": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
-                    "type": "string",
-                    "example": "Not found"
+                    "type": "string"
                 },
                 "message": {
-                    "type": "string",
-                    "example": "The requested resource was not found"
+                    "type": "string"
                 }
             }
         },
-        "main.HealthResponse": {
+        "HealthResponse": {
             "type": "object",
             "properties": {
-                "service": {
-                    "type": "string",
-                    "example": "pixel-game-backend"
-                },
                 "status": {
                     "type": "string",
                     "example": "healthy"
                 },
+                "service": {
+                    "type": "string",
+                    "example": "pixel-game-backend"
+                },
                 "timestamp": {
                     "type": "integer",
                     "example": 1234567890
-                }
-            }
-        },
-        "main.VersionResponse": {
-            "type": "object",
-            "properties": {
-                "build": {
-                    "type": "string",
-                    "example": "dev"
-                },
-                "version": {
-                    "type": "string",
-                    "example": "0.1.0"
                 }
             }
         }
@@ -198,7 +739,8 @@ const docTemplate = `{
         "ApiKeyAuth": {
             "type": "apiKey",
             "name": "Authorization",
-            "in": "header"
+            "in": "header",
+            "description": "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'"
         }
     }
 }`
@@ -208,7 +750,7 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "0.1.0",
 	Host:             "localhost:8080",
 	BasePath:         "/api/v1",
-	Schemes:          []string{},
+	Schemes:          []string{"http"},
 	Title:            "Pixel Game - 사이버펑크 덱 빌딩 카드 게임 API",
 	Description:      "Vibe 코딩 기반 사이버펑크 덱 빌딩 카드 게임의 백엔드 API 서버입니다. 프론트엔드 코드 로직과 게임플레이를 연결하여 카드 사용 시 실제 코드가 실행되는 혁신적인 게임입니다.",
 	InfoInstanceName: "swagger",

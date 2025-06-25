@@ -61,13 +61,17 @@
 - [ ] 카드 업그레이드 시스템
 - [ ] 카드 시너지 계산 로직
 
-### 📅 Phase 6: 게임 플레이 시스템
-- [ ] 게임 시작 API (`POST /api/v1/games/start`)
-- [ ] 게임 상태 조회 API (`GET /api/v1/games/:id`)
-- [ ] 카드 플레이 API (`POST /api/v1/games/:id/actions`)
-- [ ] 게임 종료 API (`POST /api/v1/games/:id/end`)
-- [ ] 턴제 전투 시스템 구현
-- [ ] 적 AI 행동 패턴 구현
+### ✅ Phase 6: 게임 플레이 시스템 (완료)
+- [x] 게임 세션 도메인 모델 설계 (GameSession, PlayerState, EnemyState)
+- [x] PostgreSQL 기반 Game Repository 구현
+- [x] 게임 시작 API (`POST /api/v1/games/start`)
+- [x] 게임 상태 조회 API (`GET /api/v1/games/:id`)
+- [x] 카드 플레이 API (`POST /api/v1/games/:id/actions`)
+- [x] 턴 종료 API (`POST /api/v1/games/:id/end-turn`)
+- [x] 게임 포기 API (`POST /api/v1/games/:id/surrender`)
+- [x] 게임 통계 API (`GET /api/v1/games/stats`)
+- [x] 기본 턴제 전투 시스템 구현
+- [x] 게임 핸들러 서버 통합
 
 ### 📅 Phase 7: 실시간 통신
 - [ ] WebSocket 연결 관리
@@ -99,19 +103,20 @@
 
 ## 🎯 현재 작업 중인 태스크
 
-### Phase 6: 게임 플레이 시스템
-게임 세션 관리와 실제 카드 게임 플레이 로직을 구현합니다.
+### Phase 7: 카드 효과 실행 엔진
+카드의 실제 효과를 처리하고 게임 상태를 업데이트하는 시스템을 구현합니다.
 
 **다음 작업:**
-1. 게임 세션 도메인 모델 설계
-2. 턴제 전투 시스템 구현
-3. 카드 효과 실행 엔진 구현
-4. 게임 상태 관리 및 동기화
+- [ ] 카드 효과 처리 엔진 구현
+- [ ] 카드 타입별 효과 실행 로직
+- [ ] 버프/디버프 시스템 구현
+- [ ] 카드 시너지 계산 로직
+- [ ] 적 AI 행동 패턴 구현
 
 ## 📊 진행률
 
-- **전체 진행률**: 50% (5/10 Phase 완료)
-- **현재 Phase 진행률**: 0% (Phase 6 시작)
+- **전체 진행률**: 60% (6/10 Phase 완료)
+- **현재 Phase 진행률**: 0% (시작 전)
 
 ## 🔗 관련 문서
 
@@ -191,10 +196,39 @@
     - 005_remove_unique_card_constraint: 카드 중복 소유 허용
   - 신규 사용자 초기 카드 지급 시스템
     - 회원가입 시 13장의 스타터 카드 자동 지급
+- 게임 플레이 시스템 구현 (Phase 6)
+  - Game 도메인 모델 (internal/domain/game.go)
+    - GameSession: 게임 세션 관리
+    - PlayerState: 플레이어 상태 (체력, 에너지, 카드 등)
+    - EnemyState: 적 상태 및 행동 의도
+    - GameState: 전체 게임 진행 상태
+  - Game Repository 구현 (internal/repository/postgres/game.go)
+    - 게임 세션 CRUD 및 상태 관리
+    - 게임 액션 기록 및 통계
+    - JSONB를 활용한 복잡한 게임 상태 저장
+  - Game Handler 구현 (internal/handlers/game.go)
+    - POST /api/v1/games/start (게임 시작)
+    - GET /api/v1/games/current (현재 게임 조회)
+    - GET /api/v1/games/:id (특정 게임 조회)
+    - POST /api/v1/games/:id/actions (카드 플레이 등 액션)
+    - POST /api/v1/games/:id/end-turn (턴 종료)
+    - POST /api/v1/games/:id/surrender (게임 포기)
+    - GET /api/v1/games/stats (게임 통계)
+  - 데이터베이스 마이그레이션
+    - 006_game_system: 게임 세션 및 액션 테이블 생성
+  - Docker 빌드 프로세스 개선
+    - Swagger 문서 자동 생성 통합
+    - 빌드 중 에러 발생 시에도 계속 진행하도록 설정
+  - API 문서 업데이트
+    - 모든 Phase 5, 6 API 엔드포인트 문서화
+    - API_INTEGRATION_GUIDE.md 업데이트
+    - Swagger docs.go 수동 작성 (자동 생성 이슈 해결 필요)
 
 ### 다음 마일스톤
-- 카드 시스템 및 컬렉션 관리 구현
-- 게임 플레이 세션 및 실시간 통신 시스템
+- 카드 효과 실행 엔진 (진행 예정)
+- 적 AI 행동 패턴 구현
+- 실시간 통신 시스템 (WebSocket)
+- 게임 밸런싱 시스템
 - 실제 "Vibe 코딩" 카드 효과 실행 엔진 구현
 
 ---

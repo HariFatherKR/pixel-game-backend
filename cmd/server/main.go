@@ -55,6 +55,7 @@ func main() {
 	// Initialize repositories
 	userRepository := postgres.NewUserRepository(db.DB)
 	cardRepository := postgres.NewCardRepository(db.DB)
+	gameRepository := postgres.NewGameRepository(db.DB)
 
 	// Initialize JWT manager
 	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
@@ -68,6 +69,7 @@ func main() {
 	authHandler := handlers.NewAuthHandler(jwtManager, userRepository, cardRepository)
 	userHandler := handlers.NewUserHandler(userRepository)
 	cardHandler := handlers.NewCardHandler(cardRepository, jwtManager)
+	gameHandler := handlers.NewGameHandler(gameRepository, cardRepository, userRepository, jwtManager)
 
 	// Initialize router
 	r := gin.Default()
@@ -132,6 +134,9 @@ func main() {
 		
 		// Card endpoints
 		cardHandler.RegisterRoutes(api)
+		
+		// Game endpoints
+		gameHandler.RegisterRoutes(api)
 		
 		// Version endpoint
 		api.GET("/version", GetVersion)

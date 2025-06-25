@@ -16,6 +16,10 @@ COPY . .
 # Download dependencies and generate go.sum
 RUN go mod tidy
 
+# Install swag and generate Swagger docs (allow failure)
+RUN go install github.com/swaggo/swag/cmd/swag@latest || true
+RUN swag init -g cmd/server/main.go --parseDependency --parseInternal -o ./docs --ot json,yaml || true
+
 # Build the application
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main cmd/server/main.go
 
@@ -30,7 +34,7 @@ WORKDIR /root/
 # Copy the binary from builder
 COPY --from=builder /app/main .
 
-# Copy swagger docs
+# Copy swagger docs (copy entire directory to ensure generated files are included)
 COPY --from=builder /app/docs ./docs
 
 # Copy config file if needed

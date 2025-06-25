@@ -252,7 +252,7 @@ try {
 ## 📋 API Endpoints Summary
 
 ### Public Endpoints (No Auth Required)
-- `GET /health` - Health check
+- `GET /api/v1/health` - Health check
 - `GET /api/v1/version` - API version
 
 ### Authentication
@@ -260,22 +260,41 @@ try {
 - `POST /api/v1/auth/login` - Login
 - `POST /api/v1/auth/logout` - Logout (requires auth)
 - `POST /api/v1/auth/refresh` - Refresh token
+- `GET /api/v1/auth/profile` - Get current user profile (requires auth)
+
+### Cards (Requires Auth)
+- `GET /api/v1/cards` - List all cards (with filtering and pagination)
+- `GET /api/v1/cards/:id` - Get specific card
+- `GET /api/v1/cards/my-collection` - Get user's card collection
+
+### Decks (Requires Auth)
+- `POST /api/v1/cards/decks` - Create new deck
+- `GET /api/v1/cards/decks` - List user's decks
+- `GET /api/v1/cards/decks/:id` - Get specific deck
+- `PUT /api/v1/cards/decks/:id` - Update deck
+- `DELETE /api/v1/cards/decks/:id` - Delete deck
+- `PUT /api/v1/cards/decks/:id/activate` - Set deck as active
+- `GET /api/v1/cards/decks/active` - Get active deck
 
 ### Game (Requires Auth)
-- `GET /api/v1/cards` - List all cards
-- `GET /api/v1/cards/:id` - Get specific card
 - `POST /api/v1/games/start` - Start new game
-- `GET /api/v1/games/:id` - Get game state
-- `POST /api/v1/games/:id/actions` - Play a card
-- `POST /api/v1/games/:id/end` - End game
+- `GET /api/v1/games/current` - Get current active game
+- `GET /api/v1/games/:id` - Get specific game
+- `POST /api/v1/games/:id/actions` - Play action (card play, etc.)
+- `POST /api/v1/games/:id/end-turn` - End turn
+- `POST /api/v1/games/:id/surrender` - Surrender game
+- `GET /api/v1/games/stats` - Get user's game statistics
 
 ### User (Requires Auth)
 - `GET /api/v1/users/profile` - Get user profile
 - `PUT /api/v1/users/profile` - Update profile
 - `GET /api/v1/users/stats` - Get user statistics
 - `GET /api/v1/users/collection` - Get card collection
+- `POST /api/v1/users/stats/games-played` - Increment games played
+- `POST /api/v1/users/stats/games-won` - Increment games won
+- `POST /api/v1/users/stats/play-time/:seconds` - Add play time
 
-### Real-time
+### Real-time (Future)
 - `WS /ws` - WebSocket connection for game updates
 
 ## 🔧 CORS Configuration

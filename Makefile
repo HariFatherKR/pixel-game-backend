@@ -1,4 +1,4 @@
-.PHONY: help build run test clean docker-build docker-up docker-down docker-logs migrate-up migrate-down rebuild quick-rebuild
+.PHONY: help build run test clean docker-build docker-up docker-down docker-logs migrate-up migrate-down rebuild quick-rebuild swagger
 
 help:
 	@echo "Available commands:"
@@ -55,3 +55,7 @@ rebuild:
 
 quick-rebuild:
 	@./scripts/quick-rebuild.sh
+
+swagger:
+	@go install github.com/swaggo/swag/cmd/swag@latest
+	@swag init -g cmd/server/main.go --parseDependency --parseInternal
