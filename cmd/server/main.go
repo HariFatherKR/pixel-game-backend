@@ -10,8 +10,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yourusername/pixel-game/internal/auth"
 	"github.com/yourusername/pixel-game/internal/config"
+	"github.com/yourusername/pixel-game/internal/database"
 	"github.com/yourusername/pixel-game/internal/handlers"
 	"github.com/yourusername/pixel-game/internal/middleware"
+	"github.com/yourusername/pixel-game/internal/repository/postgres"
 	"github.com/yourusername/pixel-game/internal/swagger"
 	_ "github.com/yourusername/pixel-game/docs"
 )
@@ -43,6 +45,16 @@ func main() {
 		// Continue with defaults
 	}
 
+	// Initialize database connection
+	db, err := database.NewConnection()
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+	defer db.Close()
+
+	// Initialize repositories
+	userRepository := postgres.NewUserRepository(db.DB)
+
 	// Initialize JWT manager
 	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
 	if jwtSecretKey == "" {
@@ -52,7 +64,8 @@ func main() {
 	jwtManager := auth.NewJWTManager(jwtSecretKey)
 
 	// Initialize handlers
-	authHandler := handlers.NewAuthHandler(jwtManager)
+	authHandler := handlers.NewAuthHandler(jwtManager, userRepository)
+	userHandler := handlers.NewUserHandler(userRepository)
 
 	// Initialize router
 	r := gin.Default()
@@ -101,6 +114,18 @@ func main() {
 			auth.Use(middleware.AuthMiddleware(jwtManager))
 			auth.POST("/logout", authHandler.Logout)
 			auth.GET("/profile", authHandler.Profile)
+		}
+		
+		// User management endpoints (protected)
+		users := api.Group("/users")
+		users.Use(middleware.AuthMiddleware(jwtManager))
+		{
+			users.PUT("/profile", userHandler.UpdateProfile)
+			users.GET("/stats", userHandler.GetStats)
+			users.GET("/collection", userHandler.GetCollection)
+			users.POST("/stats/games-played", userHandler.IncrementGamesPlayed)
+			users.POST("/stats/games-won", userHandler.IncrementGamesWon)
+			users.POST("/stats/play-time/:seconds", userHandler.AddPlayTime)
 		}
 		
 		// Card endpoints (optional auth for future features)

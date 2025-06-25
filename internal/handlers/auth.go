@@ -5,22 +5,26 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yourusername/pixel-game/internal/auth"
+	"github.com/yourusername/pixel-game/internal/domain"
 )
 
 type AuthHandler struct {
-	jwtManager *auth.JWTManager
+	jwtManager     *auth.JWTManager
+	userRepository domain.UserRepository
 }
 
-func NewAuthHandler(jwtManager *auth.JWTManager) *AuthHandler {
+func NewAuthHandler(jwtManager *auth.JWTManager, userRepository domain.UserRepository) *AuthHandler {
 	return &AuthHandler{
-		jwtManager: jwtManager,
+		jwtManager:     jwtManager,
+		userRepository: userRepository,
 	}
 }
 
 type RegisterRequest struct {
-	Username string `json:"username" binding:"required,min=3,max=20"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=6"`
+	Username string          `json:"username" binding:"required,min=3,max=20"`
+	Email    string          `json:"email" binding:"required,email"`
+	Password string          `json:"password" binding:"required,min=6"`
+	Platform domain.Platform `json:"platform" binding:"required"`
 }
 
 type LoginRequest struct {
@@ -29,15 +33,17 @@ type LoginRequest struct {
 }
 
 type AuthResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	User         User   `json:"user"`
+	AccessToken  string       `json:"access_token"`
+	RefreshToken string       `json:"refresh_token"`
+	User         UserResponse `json:"user"`
 }
 
-type User struct {
-	ID       int    `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
+type UserResponse struct {
+	ID       int             `json:"id"`
+	Username string          `json:"username"`
+	Email    string          `json:"email"`
+	Platform domain.Platform `json:"platform"`
+	Profile  *domain.UserProfile `json:"profile,omitempty"`
 }
 
 // Register godoc
@@ -61,6 +67,38 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
+	existingUser, err := h.userRepository.GetByUsername(req.Username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Error:   "Internal Server Error",
+			Message: "Failed to check username",
+		})
+		return
+	}
+	if existingUser != nil {
+		c.JSON(http.StatusConflict, ErrorResponse{
+			Error:   "Username Already Exists",
+			Message: "Username is already taken",
+		})
+		return
+	}
+
+	existingUser, err = h.userRepository.GetByEmail(req.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Error:   "Internal Server Error",
+			Message: "Failed to check email",
+		})
+		return
+	}
+	if existingUser != nil {
+		c.JSON(http.StatusConflict, ErrorResponse{
+			Error:   "Email Already Exists",
+			Message: "Email is already registered",
+		})
+		return
+	}
+
 	hashedPassword, err := auth.HashPassword(req.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{
@@ -70,14 +108,27 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	userID := 1
-	user := User{
-		ID:       userID,
-		Username: req.Username,
-		Email:    req.Email,
+	user := &domain.User{
+		Username:     req.Username,
+		Email:        req.Email,
+		PasswordHash: hashedPassword,
+		Platform:     req.Platform,
 	}
 
-	accessToken, err := h.jwtManager.GenerateAccessToken(userID, req.Username)
+	if err := h.userRepository.Create(user); err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Error:   "Internal Server Error",
+			Message: "Failed to create user",
+		})
+		return
+	}
+
+	profile, err := h.userRepository.GetProfile(user.ID)
+	if err != nil {
+		profile = nil
+	}
+
+	accessToken, err := h.jwtManager.GenerateAccessToken(user.ID, user.Username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{
 			Error:   "Internal Server Error",
@@ -86,7 +137,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	refreshToken, err := h.jwtManager.GenerateRefreshToken(userID, req.Username)
+	refreshToken, err := h.jwtManager.GenerateRefreshToken(user.ID, user.Username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{
 			Error:   "Internal Server Error",
@@ -95,12 +146,18 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	_ = hashedPassword
+	userResponse := UserResponse{
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+		Platform: user.Platform,
+		Profile:  profile,
+	}
 
 	c.JSON(http.StatusCreated, AuthResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		User:         user,
+		User:         userResponse,
 	})
 }
 
@@ -125,14 +182,40 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	userID := 1
-	user := User{
-		ID:       userID,
-		Username: req.Username,
-		Email:    "test@example.com",
+	user, err := h.userRepository.GetByUsername(req.Username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Error:   "Internal Server Error",
+			Message: "Failed to get user",
+		})
+		return
+	}
+	if user == nil {
+		c.JSON(http.StatusUnauthorized, ErrorResponse{
+			Error:   "Invalid Credentials",
+			Message: "Username or password is incorrect",
+		})
+		return
 	}
 
-	accessToken, err := h.jwtManager.GenerateAccessToken(userID, req.Username)
+	if err := auth.CheckPassword(user.PasswordHash, req.Password); err != nil {
+		c.JSON(http.StatusUnauthorized, ErrorResponse{
+			Error:   "Invalid Credentials",
+			Message: "Username or password is incorrect",
+		})
+		return
+	}
+
+	if err := h.userRepository.UpdateLastLogin(user.ID); err != nil {
+		// Log error but don't fail the login
+	}
+
+	profile, err := h.userRepository.GetProfile(user.ID)
+	if err != nil {
+		profile = nil
+	}
+
+	accessToken, err := h.jwtManager.GenerateAccessToken(user.ID, user.Username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{
 			Error:   "Internal Server Error",
@@ -141,7 +224,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	refreshToken, err := h.jwtManager.GenerateRefreshToken(userID, req.Username)
+	refreshToken, err := h.jwtManager.GenerateRefreshToken(user.ID, user.Username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{
 			Error:   "Internal Server Error",
@@ -150,10 +233,18 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	userResponse := UserResponse{
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+		Platform: user.Platform,
+		Profile:  profile,
+	}
+
 	c.JSON(http.StatusOK, AuthResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		User:         user,
+		User:         userResponse,
 	})
 }
 
@@ -251,15 +342,44 @@ func (h *AuthHandler) Profile(c *gin.Context) {
 		return
 	}
 
-	username, _ := c.Get("username")
-
-	user := User{
-		ID:       userID.(int),
-		Username: username.(string),
-		Email:    "test@example.com",
+	user, err := h.userRepository.GetByID(userID.(int))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Error:   "Internal Server Error",
+			Message: "Failed to get user",
+		})
+		return
+	}
+	if user == nil {
+		c.JSON(http.StatusNotFound, ErrorResponse{
+			Error:   "User Not Found",
+			Message: "User not found",
+		})
+		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	profile, err := h.userRepository.GetProfile(user.ID)
+	if err != nil {
+		profile = nil
+	}
+
+	stats, err := h.userRepository.GetStats(user.ID)
+	if err != nil {
+		stats = nil
+	}
+
+	userResponse := UserResponse{
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+		Platform: user.Platform,
+		Profile:  profile,
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"user":  userResponse,
+		"stats": stats,
+	})
 }
 
 type ErrorResponse struct {

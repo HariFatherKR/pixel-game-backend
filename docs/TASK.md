@@ -30,16 +30,21 @@
 - [x] 비밀번호 해싱 (bcrypt)
 - [x] 사용자 프로필 조회 API (`GET /api/v1/auth/profile`)
 
-### 🚧 Phase 4: 사용자 관리 시스템 (다음 목표)
-- [ ] 사용자 프로필 수정 API (`PUT /api/v1/users/profile`)
-- [ ] 사용자 통계 조회 API (`GET /api/v1/users/stats`)
-- [ ] 사용자 카드 컬렉션 조회 API (`GET /api/v1/users/collection`)
-- [ ] 플랫폼별 사용자 구분 (Android/iOS/Web)
-- [ ] 데이터베이스 연동 (PostgreSQL)
+### ✅ Phase 4: 사용자 관리 시스템 (완료)
+- [x] PostgreSQL 연동 Repository 패턴 구현
+- [x] User 도메인 모델 및 데이터베이스 스키마 설계
+- [x] 실제 데이터베이스 기반 인증 시스템 업그레이드
+- [x] 사용자 프로필 수정 API (`PUT /api/v1/users/profile`)
+- [x] 사용자 통계 조회 API (`GET /api/v1/users/stats`)
+- [x] 사용자 카드 컬렉션 조회 API (`GET /api/v1/users/collection`)
+- [x] 플랫폼별 사용자 구분 (Android/iOS/Web)
+- [x] 게임 통계 업데이트 API 구현
 
-### 📅 Phase 5: 카드 시스템 구현
+### 🚧 Phase 5: 카드 시스템 구현 (다음 목표)
+- [ ] 카드 도메인 모델 및 Repository 구현
 - [ ] 카드 목록 조회 API (`GET /api/v1/cards`)
 - [ ] 카드 상세 조회 API (`GET /api/v1/cards/:id`)
+- [ ] 사용자 카드 컬렉션 시스템 구현
 - [ ] 카드 효과 처리 엔진 구현
 - [ ] 카드 업그레이드 시스템
 - [ ] 카드 시너지 계산 로직
@@ -82,19 +87,19 @@
 
 ## 🎯 현재 작업 중인 태스크
 
-### Phase 4: 사용자 관리 시스템
-PostgreSQL 데이터베이스와 연동하여 실제 사용자 데이터를 관리하는 시스템을 구현합니다.
+### Phase 5: 카드 시스템 구현
+실제 게임 카드 데이터와 사용자 카드 컬렉션을 관리하는 시스템을 구현합니다.
 
 **다음 작업:**
-1. User 도메인 모델과 데이터베이스 연동
-2. Repository 패턴을 활용한 데이터 액세스 레이어 구현
-3. 실제 사용자 데이터 기반 인증 시스템 업그레이드
-4. 사용자 프로필 관리 API 구현
+1. Card 도메인 모델과 Repository 패턴 구현
+2. 카드 마스터 데이터 관리 시스템
+3. 사용자별 카드 컬렉션 시스템
+4. 카드 효과와 코드 실행 엔진 기초 구현
 
 ## 📊 진행률
 
-- **전체 진행률**: 30% (3/10 Phase 완료)
-- **현재 Phase 진행률**: 0% (Phase 4 시작)
+- **전체 진행률**: 40% (4/10 Phase 완료)
+- **현재 Phase 진행률**: 0% (Phase 5 시작)
 
 ## 🔗 관련 문서
 
@@ -136,11 +141,23 @@ PostgreSQL 데이터베이스와 연동하여 실제 사용자 데이터를 관�
     - POST /api/v1/auth/refresh (토큰 갱신)
     - GET /api/v1/auth/profile (프로필 조회)
   - JWT 시크릿 키 환경변수 설정 (JWT_SECRET_KEY)
+- PostgreSQL 기반 사용자 관리 시스템 구현 완료
+  - DDD 패턴을 활용한 User 도메인 모델 (internal/domain/user.go)
+  - Repository 패턴 기반 데이터 액세스 (internal/repository/postgres/user.go)
+  - 데이터베이스 연결 및 환경 설정 (internal/database/connection.go)
+  - 실제 DB 기반 사용자 인증 (중복 검사, 비밀번호 검증)
+  - 사용자 프로필 및 통계 관리 API (internal/handlers/user.go)
+    - PUT /api/v1/users/profile (프로필 수정)
+    - GET /api/v1/users/stats (통계 조회)
+    - GET /api/v1/users/collection (카드 컬렉션)
+    - POST /api/v1/users/stats/* (통계 업데이트)
+  - 플랫폼별 사용자 구분 (Web, Android, iOS)
+  - 데이터베이스 마이그레이션 (002_user_system_update)
 
 ### 다음 마일스톤
-- PostgreSQL과 연동된 사용자 관리 시스템 구현
-- Repository 패턴을 활용한 데이터 액세스 레이어 구현
-- 실제 카드 데이터 기반 API 구현
+- 카드 시스템 및 컬렉션 관리 구현
+- 게임 플레이 세션 및 실시간 통신 시스템
+- 실제 "Vibe 코딩" 카드 효과 실행 엔진 구현
 
 ---
 
