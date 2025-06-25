@@ -11,17 +11,17 @@ import (
 	_ "github.com/yourusername/pixel-game/docs"
 )
 
-// @title           Pixel Game API
-// @version         1.0
-// @description     API server for Cyberpunk Deck Building Card Game
-// @termsOfService  http://swagger.io/terms/
+// @title           Pixel Game - 사이버펑크 덱 빌딩 카드 게임 API
+// @version         0.1.0
+// @description     Vibe 코딩 기반 사이버펑크 덱 빌딩 카드 게임의 백엔드 API 서버입니다. 프론트엔드 코드 로직과 게임플레이를 연결하여 카드 사용 시 실제 코드가 실행되는 혁신적인 게임입니다.
+// @termsOfService  https://github.com/HariFatherKR/pixel-game-backend
 
-// @contact.name   API Support
-// @contact.url    http://www.pixelgame.io/support
+// @contact.name   Pixel Game Backend Team
+// @contact.url    https://github.com/HariFatherKR/pixel-game-backend/issues
 // @contact.email  support@pixelgame.io
 
-// @license.name  Apache 2.0
-// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+// @license.name  MIT License
+// @license.url   https://opensource.org/licenses/MIT
 
 // @host      localhost:8080
 // @BasePath  /api/v1
@@ -41,15 +41,15 @@ func main() {
 	// Initialize router
 	r := gin.Default()
 
-	// Health check endpoint
-	r.GET("/health", HealthCheck)
-
 	// Setup Swagger
 	swagger.SetupSwagger(r)
 
 	// API routes
 	api := r.Group("/api/v1")
 	{
+		// Health check endpoint
+		api.GET("/health", HealthCheck)
+		
 		// Card endpoints
 		api.GET("/cards", GetCards)
 		api.GET("/cards/:id", GetCard)
@@ -88,12 +88,12 @@ func HealthCheck(c *gin.Context) {
 }
 
 // GetCards godoc
-// @Summary      List all cards
-// @Description  Get a list of all available cards
+// @Summary      카드 목록 조회
+// @Description  게임에서 사용 가능한 모든 카드 목록을 조회합니다. 각 카드는 고유한 코드 효과를 가지고 있습니다.
 // @Tags         cards
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}  CardsResponse
+// @Success      200  {object}  CardsResponse  "카드 목록"
 // @Router       /cards [get]
 func GetCards(c *gin.Context) {
 	c.JSON(http.StatusOK, CardsResponse{
@@ -107,14 +107,14 @@ func GetCards(c *gin.Context) {
 }
 
 // GetCard godoc
-// @Summary      Get card by ID
-// @Description  Get details of a specific card
+// @Summary      카드 상세 조회
+// @Description  특정 카드의 상세 정보를 조회합니다. 카드의 코드 효과와 시각적 효과 정보를 포함합니다.
 // @Tags         cards
 // @Accept       json
 // @Produce      json
-// @Param        id   path      int  true  "Card ID"
-// @Success      200  {object}  Card
-// @Failure      404  {object}  ErrorResponse
+// @Param        id   path      int  true  "카드 ID"
+// @Success      200  {object}  Card          "카드 상세 정보"
+// @Failure      404  {object}  ErrorResponse "카드를 찾을 수 없음"
 // @Router       /cards/{id} [get]
 func GetCard(c *gin.Context) {
 	// This is a placeholder implementation

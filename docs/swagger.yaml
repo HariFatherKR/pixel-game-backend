@@ -66,15 +66,15 @@ host: localhost:8080
 info:
   contact:
     email: support@pixelgame.io
-    name: API Support
-    url: http://www.pixelgame.io/support
-  description: API server for Cyberpunk Deck Building Card Game
+    name: Pixel Game Backend Team
+    url: https://github.com/HariFatherKR/pixel-game-backend/issues
+  description: Vibe 코딩 기반 사이버펑크 덱 빌딩 카드 게임의 백엔드 API 서버입니다. 프론트엔드 코드 로직과 게임플레이를 연결하여 카드 사용 시 실제 코드가 실행되는 혁신적인 게임입니다.
   license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: http://swagger.io/terms/
-  title: Pixel Game API
-  version: "1.0"
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://github.com/HariFatherKR/pixel-game-backend
+  title: Pixel Game - 사이버펑크 덱 빌딩 카드 게임 API
+  version: "0.1.0"
 paths:
   /cards:
     get:
@@ -116,7 +116,7 @@ paths:
       summary: Get card by ID
       tags:
       - cards
-  /health:
+  /api/v1/health:
     get:
       consumes:
       - application/json

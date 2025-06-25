@@ -205,12 +205,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
+	Version:          "0.1.0",
 	Host:             "localhost:8080",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "Pixel Game API",
-	Description:      "API server for Cyberpunk Deck Building Card Game",
+	Title:            "Pixel Game - 사이버펑크 덱 빌딩 카드 게임 API",
+	Description:      "Vibe 코딩 기반 사이버펑크 덱 빌딩 카드 게임의 백엔드 API 서버입니다. 프론트엔드 코드 로직과 게임플레이를 연결하여 카드 사용 시 실제 코드가 실행되는 혁신적인 게임입니다.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }
